@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古建筑榫卯语料库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Noto Serif SC", "Microsoft Yahei", "SimSun", serif;
+        }
+
+        body {
+            background-color: #f9f6f0;
+            padding: 20px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
+                url("https://img2.baidu.com/it/u=1500500394,250000000&fm=253&fmt=auto&app=138&f=JPEG?w=1200&h=800");
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 60px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(139, 69, 19, 0.15);
+            border: 1px solid #e6d9c8;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #8B4513;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #8B4513, transparent);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 50px;
+            align-items: center;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+            align-items: center;
+        }
+
+        #keyword {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #d3b897;
+            border-radius: 8px;
+            font-size: 17px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #fdfbf8;
+        }
+
+        #keyword:focus {
+            border-color: #8B4513;
+            box-shadow: 0 0 12px rgba(139, 69, 19, 0.18);
+            background: #fff;
+        }
+
+        #keyword::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        #search-btn {
+            padding: 16px 35px;
+            background-color: #8B4513;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        #search-btn:hover {
+            background-color: #A0522D;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(139, 69, 19, 0.2);
+        }
+
+        #search-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .search-tips {
+            color: #777;
+            font-size: 15px;
+            max-width: 800px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .search-tips span {
+            color: #8B4513;
+            font-weight: bold;
+        }
+
+        .result-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: #f8f5f0;
+            border-radius: 8px;
+            border-left: 4px solid #8B4513;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .result-count {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .result-count span {
+            color: #8B4513;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .category-filter label {
+            font-size: 15px;
+            color: #555;
+        }
+
+        .category-filter select {
+            padding: 8px 15px;
+            border: 1px solid #d3b897;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 15px;
+            color: #333;
+            outline: none;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .category-filter select:disabled {
+            background: #f0ece6;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .result-list {
+            display: grid;
+            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+        }
+
+        .result-item {
+            padding: 30px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #fff;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #8B4513;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            border-color: #d3b897;
+        }
+
+        .result-item:hover::before {
+            width: 8px;
+        }
+
+        .item-header {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #e6d9c8;
+            padding-bottom: 15px;
+        }
+
+        .item-name {
+            font-size: 24px;
+            color: #8B4513;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .item-english {
+            font-size: 15px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .item-tags {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .item-category {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #f0e8d8;
+            color: #8B4513;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .item-category.primary {
+            background: #8B4513;
+            color: #fff;
+        }
+
+        .item-content {
+            font-size: 16px;
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px 15px;
+        }
+
+        .item-label {
+            font-weight: bold;
+            color: #8B4513;
+            text-align: right;
+            padding-right: 10px;
+            border-right: 1px solid #f0e8d8;
+        }
+
+        .item-value {
+            color: #444;
+        }
+
+        .item-reference {
+            font-family: "Courier New", monospace;
+            color: #2c5282;
+            word-break: break-all;
+        }
+
+        .item-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .status-completed {
+            background: #f0f9f0;
+            color: #2e7d32;
+        }
+
+        .empty-result {
+            text-align: center;
+            padding: 80px 20px;
+            background: #f8f5f0;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+
+        .empty-result .icon {
+            font-size: 50px;
+            color: #d3b897;
+            margin-bottom: 20px;
+        }
+
+        .empty-result h3 {
+            color: #8B4513;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .empty-result p {
+            color: #777;
+            font-size: 17px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f0e8d8;
+            border-top: 5px solid #8B4513;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading p {
+            color: #8B4513;
+            font-size: 18px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 50px;
+            padding: 20px 0;
+        }
+
+        .page-btn {
+            padding: 10px 18px;
+            border: 1px solid #d3b897;
+            border-radius: 6px;
+            background: #fff;
+            color: #8B4513;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover {
+            background: #f8f5f0;
+            border-color: #8B4513;
+        }
+
+        .page-btn.active {
+            background: #8B4513;
+            color: #fff;
+            border-color: #8B4513;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8f5f0;
+            color: #999;
+            border-color: #eee;
+        }
+
+        .page-info {
+            font-size: 16px;
+            color: #666;
+        }
+
+        @media (max-width: 1200px) {
+            .result-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+                letter-spacing: 2px;
+            }
+
+            .search-box {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            #keyword,
+            #search-btn {
+                width: 100%;
+            }
+
+            .result-info {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .category-filter {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .item-content {
+                grid-template-columns: 1fr;
+            }
+
+            .item-label {
+                text-align: left;
+                padding-right: 0;
+                border-right: none;
+                border-bottom: 1px solid #f0e8d8;
+                padding-bottom: 5px;
+                margin-bottom: 5px;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .page-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .search-tips {
+                font-size: 14px;
+            }
+
+            .item-name {
+                font-size: 20px;
+            }
+
+            .item-content {
+                font-size: 15px;
+            }
+        }
+        .item-image {
+            margin-bottom: 20px;
+            text-align: center;
+            background: #faf7f2;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #f0e8d8;
+        }
+
+        .item-image img {
+            max-width: 100%;
+            max-height: 260px;
+            width: auto;
+            height: auto;
+            border-radius: 6px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+        }
+
+        .item-image img:hover {
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>榫卯昭鉴</h1>
+            <p>古建筑榫卯结构与文化内涵双证对照语料库</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="keyword" placeholder="输入关键词检索（如：燕尾榫、榫卯类、GB/T 37646-2019、《中国建筑图解词典》）">
+                <button id="search-btn">检索</button>
+            </div>
+            <div class="search-tips">
+                <br><span>检索范围：中文术语、英文翻译、定义说明、文化注释、参考文献、一级分类、二级分类</span>
+                （示例：搜索"榫卯"获取所有榫卯类数据，搜索"GB"获取标准文献相关数据）</br>
+            </div>
+        </div>
+
+        <div class="result-info" style="display: none;">
+            <div class="result-count">找到 <span id="total-count">0</span> 条相关语料</div>
+            <div class="category-filter">
+                <label for="primary-select">一级分类：</label>
+                <select id="primary-select">
+                    <option value="all">全部大类</option>
+                </select>
+                <label for="category-select">二级分类：</label>
+                <select id="category-select" disabled>
+                    <option value="all">全部二级</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="result-container">
+            <div class="empty-result">
+                <div class="icon">📚</div>
+                <h3>欢迎使用榫卯昭鉴语料库</h3>
+                <p>本语料库收录204条古建筑榫卯相关数据，包含中文术语、英文翻译、定义说明、文化注释、参考文献等完整信息<br>请在上方输入关键词进行检索，或使用分类筛选功能浏览（若使用分类筛选功能，请直接点击上方检索按钮）
+                </p>
+            </div>
+        </div>
+
+        <div id="pagination" class="pagination" style="display: none;">
+            <button class="page-btn" id="prev-page" disabled>上一页</button>
+            <span class="page-info"><span id="current-page">1</span>/<span id="total-pages">1</span> 页</span>
+            <button class="page-btn" id="next-page" disabled>下一页</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 一级分类 → 二级分类 映射表
+        // ============================================================
+        const categoryTree = {
+            "榫卯类": ["榫卯类"],
+            "斗拱类": ["斗拱类"],
+            "屋架类": ["屋架", "屋架构件", "屋顶结构", "屋顶构件", "屋顶瓦作", "屋顶样式", "屋顶装修", "草架", "特殊构件", "梁枋构件"],
+            "屋顶类": ["屋顶样式", "屋顶结构", "屋顶构件", "屋顶瓦作", "屋顶装修"],
+            "装饰类": ["建筑装饰", "墙体类", "门窗", "构件", "楼梯类", "排水类"],
+            "台基与柱类": ["台基", "台基柱类", "柱类"]
+        };
+
+        // ============================================================
+        // 语料库完整数据（204条）
+        // 每条数据新增 primaryCategory 字段
+        // ============================================================
+        const corpusData = [
+            { "id": 1, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "榫卯", "englishName": "Mortise and Tenon Joint", "definition": "中国传统木构的凹凸咬合连接构造，是所有木作节点的统称，依靠构件几何咬合，无需金属钉即可稳固连接。", "culturalNote": "起源于7000年前河姆渡文化，不用铁钉即可使构件牢固结合，体现了“以柔克刚”“阴阳互补”的哲学思想。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun1.png" },
+            { "id": 2, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "燕尾榫", "englishName": "Dovetail Joint", "definition": "多用于古建小木作，用于博风板、山花板拼接，梯形榫头相互锁合，防止板材受拉力拉开。", "culturalNote": "因形似燕尾而得名，梯形结构越拉越紧，常用于抽屉、箱柜等需要承受拉力的部位。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun2.png" },
+            { "id": 3, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "银锭榫", "englishName": "Dovetailed Tenon", "definition": "木板拼接构件，形似银锭，用于山花板、博风板的板缝拉结，古建筑又称银锭扣。", "culturalNote": "因形似古代银锭而得名，两头宽中间细的结构使其嵌入后无法脱出，是古代用于防止拼缝开裂的经典做法。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun3.png" },
+            { "id": 4, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "长短榫", "englishName": "Long and Short Tenons", "definition": "木柱上下端成对设置一长一短榫头，用来固定柱身，限制位移，抵抗建筑侧移。", "culturalNote": "常用于腿足与面板连接，两个榫头一长一短，既能增加接触面，又能防止面板翘曲变形。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun4.png" },
+            { "id": 5, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "穿带", "englishName": "Through Strap Tenon", "definition": "镶嵌在大门板、望板内部的长条木件，约束木板，分散板面应力，防止板面翘曲变形。", "culturalNote": "用于桌面、柜门等拼板背面，梯形长榫穿入燕尾槽后越推越紧，是解决木材缩涨问题的巧妙方法。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun5.png" },
+            { "id": 6, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "半榫", "englishName": "Blind Tenon", "definition": "梁枋与柱子相交使用，榫头插入柱内但不穿透柱身，多用于边柱、山柱节点。", "culturalNote": "榫头深度小于构件厚度，使家具外表面整洁美观，多用于高档家具。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun6.png" },
+            { "id": 7, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "透榫", "englishName": "Through Tenon", "definition": "梁枋榫头贯穿整个柱身，可有效传递构件之间的拉力，多用于檐柱受力节点。", "culturalNote": "榫头完全穿透构件，在大木作和民间家具中常见，既增加结构强度又有装饰效果。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun7.png" },
+            { "id": 8, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "明榫", "englishName": "Exposed Tenon", "definition": "外露型榫头，装配完成后榫头露在构件外侧，加工简单，常见于次要木作构件。", "culturalNote": "常用于民间家具和建筑大木作，便于加工和维修，体现质朴的工艺美学。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun7.png" },
+            { "id": 9, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "暗榫", "englishName": "Concealed Tenon", "definition": "榫头完全藏于构件内部，完工后外部无法看见榫头，外观整洁，多用于小木作。", "culturalNote": "榫头完全隐藏，是精细工艺的体现，多用于高档家具，加工难度高于明榫。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun9.png" },
+            { "id": 10, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "企口榫", "englishName": "Tongue and Groove Joint", "definition": "用于屋面望板、木楼板，板边凹凸互补拼接，使板面拼合严密，防止漏风漏雨。", "culturalNote": "一条边做凸起的榫舌，另一条边做凹进的榫槽，常用于地板、墙板拼合，防止透光和错位。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun10.png" },
+            { "id": 11, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "槽口榫", "englishName": "Grooved Tenon", "definition": "墙板、木盖板之间的侧向咬合拼接榫卯，板件侧边开槽对接，用于围护木板拼接。", "culturalNote": "在板材边缘开槽，另一块板材对应部位做成凸榫插入，常用于箱柜类家具背板。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun11.png" },
+            { "id": 12, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "龙凤榫", "englishName": "Dragon-phoenix Tenon", "definition": "长木板拼合使用，凹凸槽口更长，增大拼板接触面，提升大板整体性。", "culturalNote": "拼板时使用，将薄板边缘刨出半个银锭形榫，推入相邻板边的槽口中，常用于桌案面心板。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun12.png" },
+            { "id": 13, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "通榫", "englishName": "Full Through Tenon", "definition": "榫头贯穿构件全长的长榫，多用于大木构件对接，传递轴力。", "culturalNote": "榫头完全穿透构件，常用于建筑梁柱连接。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun13.png" },
+            { "id": 14, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "双榫", "englishName": "Double Tenon", "definition": "梁枋端头并列设置两个榫头，分散受力，提高节点抗剪强度，用于荷载较大的节点。", "culturalNote": "同一位置使用两个榫头，增加接触面和连接强度。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun14.png" },
+            { "id": 15, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "大进小出榫", "englishName": "Big-in Small-out Tenon", "definition": "梁插入柱子的经典清式大木榫，榫头一大一小，兼顾受力与安装。", "culturalNote": "只有一半外露，半榫则藏在榫眼中。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun15.png" },
+            { "id": 16, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "卡腰子榫", "englishName": "Waist-caught Tenon", "definition": "两根檩条搭交时使用的榫卯，中间收窄形似蜂腰，又称马蜂腰榫。", "culturalNote": "两个部件相交的地方上下各切去一半，常用于横竖材连接。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun16.png" },
+            { "id": 17, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "勾挂榫", "englishName": "Hanging Tenon", "definition": "带弯钩形态的榫头，勾锁卯口，承受向外拉力，防止构件向外拔脱。", "culturalNote": "嵌入后斜面产生倒勾作用，再用楔形料填入，常用于需要紧固连接的部位。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun17.png" },
+            { "id": 18, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "套榫", "englishName": "Sleeve Tenon", "definition": "瓜柱、短柱套接使用，一榫一筒相互套合，用于短柱类构件对接。", "culturalNote": "明清椅子的搭脑不出挑时使用，腿料作方挖出榫，搭脑部位挖方形榫眼。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun18.png" },
+            { "id": 19, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "馒头榫", "englishName": "Breadhead Tenon", "definition": "柱头顶端半圆形短榫，和梁底海眼咬合连接，传递上部竖向荷载。", "culturalNote": "用于柱头与梁枋连接，防止水平位移，是大木作常用榫卯。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun19.png" },
+            { "id": 20, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "销钉榫", "englishName": "Dowel Tenon", "definition": "木销横向穿过榫头，锁住透榫，限制榫头滑动，避免榫头脱出。", "culturalNote": "用木销固定两个构件，常用于梁枋搭接处。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun20.png" },
+            { "id": 21, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "十字榫", "englishName": "Cross Tenon", "definition": "檩条、斗拱构件十字相交位置使用的榫卯，十字构件互相咬合。", "culturalNote": "两个构件交叉连接时使用，各出一半榫头相互咬合。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun21.png" },
+            { "id": 22, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "齿榫", "englishName": "Serrated Tenon", "definition": "木板边缘锯齿状咬合，增大拼接摩擦力，用于小木作板材拼接。", "culturalNote": "榫头做成齿状，增加接触面和摩擦力，用于受力较大的连接。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun22.png" },
+            { "id": 23, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "直榫", "englishName": "Straight Tenon", "definition": "基础平直榫头，构造简单，大木、小木作均可通用。", "culturalNote": "榫卯的最基本形式，榫头为矩形直插入卯眼，是所有复杂榫卯的基础。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun23.png" },
+            { "id": 24, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "袖肩燕尾榫", "englishName": "Shouldered Dovetail Tenon", "definition": "枋构件端部燕尾榫加袖肩，肩部分担剪力，增强节点抗剪性能。", "culturalNote": "在燕尾榫基础上增加袖肩，肩部分担剪力，是明清大木作常见做法。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun24.png" },
+            { "id": 25, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "檩碗榫", "englishName": "Purlin Mortise Tenon", "definition": "梁上承接檩条的配套榫卯，梁上凹卯称作檩碗，承托檩条端部。", "culturalNote": "梁上挖出碗状凹槽承托檩条，是檩条与梁架连接的经典做法。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun25.png" },
+            { "id": 26, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "瓜柱管脚榫", "englishName": "Short Column Foot Tenon", "definition": "瓜柱下端榫头，落于梁架海眼，固定瓜柱，防止瓜柱滑移。", "culturalNote": "瓜柱下端的短榫，插入梁架卯眼，固定瓜柱位置。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun26.png" },
+            { "id": 27, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "由额榫", "englishName": "You'e Tenon", "definition": "宋代木构术语，由额与檐柱相交位置的连接榫卯，属于宋式额枋节点。", "culturalNote": "宋式由额与檐柱的连接榫卯，属于宋式额枋节点做法。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun27.png" },
+            { "id": 28, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "替木榫", "englishName": "Timber Bracket Tenon", "definition": "替木和斗拱、栱件之间的连接榫卯，传递斗拱荷载至梁枋。", "culturalNote": "替木与斗拱、栱件之间的连接榫卯，传递斗拱荷载。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun28.png" },
+            { "id": 29, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "垫板榫", "englishName": "Pad Board Tenon", "definition": "檩下垫板，连接垫板与檩、枋的榫卯，固定檩下垫板。", "culturalNote": "檩下垫板与檩、枋之间的连接榫卯，固定垫板位置。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun29.png" },
+            { "id": 30, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "椽榫", "englishName": "Rafter Tenon", "definition": "椽子端部榫头，嵌入檩条预留卯口，固定屋面椽子。", "culturalNote": "椽子端部榫头，嵌入檩条卯口，固定屋面椽子。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun30.png" },
+            { "id": 31, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "桁榫", "englishName": "Purlin Tenon", "definition": "宋式称谓，桁（檩）端头对接、搭交使用的榫卯，用于宋式大木桁条连接。", "culturalNote": "宋式桁条端头对接、搭交使用的榫卯，用于宋式大木桁条连接。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun31.png" },
+            { "id": 32, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "普拍枋榫", "englishName": "Pupaifang Tenon", "definition": "普拍枋与檐柱、斗拱底部相接的榫卯，普拍枋承托整组斗拱。", "culturalNote": "普拍枋与檐柱、斗拱底部的连接榫卯，承托整组斗拱。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun32.png" },
+            { "id": 33, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "雀替榫", "englishName": "Queti Tenon", "definition": "雀替两端与柱子、梁枋连接的榫卯，雀替分担梁端剪力，兼具装饰。", "culturalNote": "雀替两端与柱子、梁枋的连接榫卯，分担梁端剪力。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun33.png" },
+            { "id": 34, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "博风榫", "englishName": "Gable Bargeboard Tenon", "definition": "博风板固定在山面檩条上的连接榫卯，用于建筑山面封护板材。", "culturalNote": "博风板固定在山面檩条上的连接榫卯，用于山面封护。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun34.png" },
+            { "id": 35, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "阑额榫", "englishName": "Lane Tenon", "definition": "宋式术语，阑额两端榫头箍接檐柱，拉结左右檐柱，稳定框架。", "culturalNote": "宋式阑额两端榫头箍接檐柱，拉结左右檐柱，稳定框架。", "reference": "《营造法式》李诫", "status": "已完成", "image": "./images/sun/sun35.png" },
+            { "id": 36, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "夹榫", "englishName": "Clamped Tenon", "definition": "在构件侧面开槽，嵌入夹板式榫件加固节点，多用于补强大木节点。", "culturalNote": "在构件侧面开槽，嵌入夹板式榫件加固节点，多用于补强大木节点。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun36.png" },
+            { "id": 37, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "压掌榫", "englishName": "Overlapping Lap Tenon", "definition": "屋面木构件搭接，上件压住下件的咬合榫卯，防止雨水渗入接缝。", "culturalNote": "屋面木构件搭接，上件压住下件的咬合榫卯，防止雨水渗入接缝。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun37.png" },
+            { "id": 38, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "飘肩榫", "englishName": "Floating Shoulder Tenon", "definition": "枋类构件带飘出肩线，用于古建小木作枋件连接，分散节点应力。", "culturalNote": "枋类构件带飘出肩线，用于古建小木作枋件连接，分散节点应力。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun38.png" },
+            { "id": 39, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "斗口榫", "englishName": "Doukou Tenon", "definition": "斗拱斗口内部，拱件嵌入的标准榫卯，是斗拱体系核心连接方式。", "culturalNote": "斗拱斗口内部，拱件嵌入的标准榫卯，是斗拱体系核心连接方式。", "reference": "《清式营造则例》梁思成", "status": "已完成", "image": "./images/sun/sun39.png" },
+            { "id": 40, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "生头榫", "englishName": "Rough-end Tenon", "definition": "构件端头预留短榫，现场修整装配，用于后期拼装的木构件。", "culturalNote": "构件端头预留短榫，现场修整装配，用于后期拼装的木构件。", "reference": "《中国古建筑木作营造技术》马炳坚", "status": "已完成", "image": "./images/sun/sun40.png" },            
+            { "id": 41, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "斗拱", "englishName": "Dougong (bracket set)", "definition": "由方形斗、升与矩形栱、斜向昂组成，挑出承重并传递屋面荷载。", "culturalNote": "中国古建筑核心构件，兼具结构与装饰功能，体现建筑等级。", "reference": "《传统建筑工程技术标准》", "status": "已完成","image": "./images/dou/dou1.png"  },
+            { "id": 42, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "斗", "englishName": "Dou (block)", "definition": "斗拱中方形垫块，承托栱、昂、升，起垫托与传力作用。", "culturalNote": "斗拱基本单元，形似量器斗，故名。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/dou/dou2.png"  },
+            { "id": 43, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "栱", "englishName": "Gong (arm)", "definition": "斗拱中水平弯曲木构件，承托上层构件并出跳。", "culturalNote": "弯曲如弓，是斗拱出挑核心构件。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/dou/dou3.png"  },
+            { "id": 44, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "昂", "englishName": "Ang (slanting arm)", "definition": "斗拱中斜向构件，前端下斜或上挑，后端承托荷载。", "culturalNote": "唐宋雄健，明清装饰化，分翘昂、批竹昂等。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou4.png"  },
+            { "id": 45, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "升", "englishName": "Sheng (small block)", "definition": "小于斗的方形小垫块，用于栱两端承托上层构件。", "culturalNote": "体量小，承托面窄，与斗功能相近。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou5.png"  },
+            { "id": 46, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "翘", "englishName": "Qiao (rising arm)", "definition": "向上翘起的短栱，连接斗与上层构件，增加出跳层次。", "culturalNote": "清式称谓，宋称“华栱”。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou6.png"  },
+            { "id": 47, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "华栱", "englishName": "Huagong", "definition": "宋式斗拱中垂直于面阔方向出跳的栱件。", "culturalNote": "宋式核心跳头构件，清称翘。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou7.png"  },
+            { "id": 48, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "泥道栱", "englishName": "Nidaogong", "definition": "宋式斗拱中，与华栱相交、沿面阔方向的横栱。", "culturalNote": "用于柱头铺作，承托慢栱与枋。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou8.png"  },
+            { "id": 49, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "慢栱", "englishName": "Mangong", "definition": "宋式斗拱中，叠压在泥道栱或瓜子栱之上的横栱。", "culturalNote": "长度更长，承托枋与上层构件。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou9.png"  },
+            { "id": 50, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "瓜子栱", "englishName": "Guazigong", "definition": "宋式跳头横栱，承托令栱与慢栱。", "culturalNote": "跳头第一层横栱，形制短小。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou10.png"  },
+            { "id": 51, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "令栱", "englishName": "Linggong", "definition": "宋式最外跳端头横栱，承托撩檐枋。", "culturalNote": "最外端装饰与承重构件。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou11.png"  },
+            { "id": 52, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "耍头", "englishName": "Shuatou", "definition": "斗拱最前端伸出的短木，形似头状，起装饰与封护作用。", "culturalNote": "清式称蚂蚱头，宋称耍头。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou12.png"  },
+            { "id": 53, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "衬方头", "englishName": "Chenfangtou", "definition": "耍头之上、封护檐口的平直木件，固定檐部。", "culturalNote": "保护斗拱外端，增强整体性。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou13.png"  },
+            { "id": 54, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "柱头科", "englishName": "Zhutouke", "definition": "清式斗拱，安装在柱头上的斗拱，承重最大。", "culturalNote": "主要承重斗拱，等级高。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou14.png"  },
+            { "id": 55, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "平身科", "englishName": "Pingshenke", "definition": "清式斗拱，安装在两柱之间额枋上的斗拱，辅助承重。", "culturalNote": "分布密，装饰性强。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou15.png"  },
+            { "id": 56, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "角科", "englishName": "Jiaoke", "definition": "清式斗拱，安装在转角柱头，双向出跳承托角梁。", "culturalNote": "结构最复杂，受力最复杂。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou16.png"  },
+            { "id": 57, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "铺作", "englishName": "Puzuo", "definition": "宋式对一组斗拱的称谓，指斗、栱、昂组合单元。", "culturalNote": "分柱头铺作、补间铺作、转角铺作。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou17.png"  },
+            { "id": 58, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "补间铺作", "englishName": "Bujian Puzuo", "definition": "宋式，两柱头之间、安装在阑额上的铺作。", "culturalNote": "清称平身科，起均分荷载作用。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou18.png"  },
+            { "id": 59, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "转角铺作", "englishName": "Zhuanjiao Puzuo", "definition": "宋式，角柱上双向出跳的铺作。", "culturalNote": "清称角科，结构最繁复。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou19.png"  },
+            { "id": 60, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "出跳", "englishName": "Chutiao (protruding)", "definition": "斗拱向外出挑的层数，一跳为一华栱或昂。", "culturalNote": "跳数越多，建筑等级越高。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/dou/dou20.png"  },
+            { "id": 61, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "计心造", "englishName": "Jixinzao", "definition": "宋式斗拱，每跳均施横栱，结构稳定。", "culturalNote": "刚度强，唐宋主流做法。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou21.png"  },
+            { "id": 62, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "偷心造", "englishName": "Touxinzao", "definition": "宋式斗拱，跳头不施横栱，仅留华栱或昂。", "culturalNote": "轻巧简洁，唐代多见。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou22.png"  },
+            { "id": 63, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "批竹昂", "englishName": "Pizhi Ang", "definition": "宋式昂嘴削尖如竹批，斜直向下。", "culturalNote": "唐宋雄健风格代表。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou23.png"  },
+            { "id": 64, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "琴面昂", "englishName": "Qinmian Ang", "definition": "昂嘴呈圆弧如琴面，造型圆润。", "culturalNote": "明清装饰化昂，结构作用减弱。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou24.png"  },
+            { "id": 65, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "蚂蚱头", "englishName": "Mazhatou", "definition": "清式耍头，形似蚂蚱头，前端平直。", "culturalNote": "清式斗拱标志性构件。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou25.png"  },
+            { "id": 66, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "撑头木", "englishName": "Chengtoumu", "definition": "清式斗拱，蚂蚱头之后水平木件，承托桁檩。", "culturalNote": "传递荷载至正心枋。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou26.png"  },
+            { "id": 67, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "正心枋", "englishName": "Zhengxin Fang", "definition": "清式，斗拱中心线上的枋木，连接各攒斗拱。", "culturalNote": "保持斗拱整体性与稳定性。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou27.png"  },
+            { "id": 68, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "拽枋", "englishName": "Zhuai Fang", "definition": "清式，斗拱出跳部分的横枋。", "culturalNote": "拉结跳头，增强稳定性。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou28.png"  },
+            { "id": 69, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "井口枋", "englishName": "Jingkou Fang", "definition": "清式，斗拱最上层承托天花枋的构件。", "culturalNote": "衔接斗拱与天花吊顶。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou29.png"  },
+            { "id": 70, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "厢栱", "englishName": "Xianggong", "definition": "清式，最外跳及最里跳承托枋木的横栱。", "culturalNote": "对应宋式令栱。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou30.png"  },
+            { "id": 71, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "三才升", "englishName": "Sancai Sheng", "definition": "清式，厢栱两端所垫小升。", "culturalNote": "承托拽枋与井口枋。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou31.png"  },
+            { "id": 72, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "槽升子", "englishName": "Caoshengzi", "definition": "清式，正心栱两端的升，有槽以承正心枋。", "culturalNote": "固定正心枋位置。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou32.png"  },
+            { "id": 73, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "十八斗", "englishName": "Shibadou", "definition": "清式，翘或昂头上承托耍头与翘昂的斗。", "culturalNote": "斗形方大，承托面广。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou33.png"  },
+            { "id": 74, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "交互斗", "englishName": "Jiaohudou", "definition": "宋式，华栱与泥道栱相交处的斗。", "culturalNote": "十字开口，承托双向构件。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou34.png"  },
+            { "id": 75, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "齐心斗", "englishName": "Qixindou", "definition": "宋式，横栱正中的斗，承托上层枋或栱。", "culturalNote": "位于构件中心，均衡传力。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/dou/dou35.png"  },
+            { "id": 76, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "庑殿顶", "englishName": "Wudian / Hip roof", "definition": "由四面坡组成，有一条正脊和四条垂脊。又称“四阿顶”。", "culturalNote": "中国古代建筑中等级最高的屋顶样式，常用于皇宫、庙宇的主殿。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu1.png"  },
+            { "id": 77, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "歇山顶", "englishName": "Xieshan / Hip-and-gable roof", "definition": "由上部悬山与下部庑殿结合而成，即“九脊殿”（一条正脊、四条垂脊、四条戗脊）。", "culturalNote": "等级仅次于庑殿顶，多用于宫殿、园林、寺观，造型优美。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu2.png"  },
+            { "id": 78, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "悬山顶", "englishName": "Xuanshan / Overhanging gable roof", "definition": "屋檐两端伸出山墙之外，以保护山墙。", "culturalNote": "南方多用，利于防雨；等级低于歇山顶，常见于民居。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu3.png"  },
+            { "id": 79, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "硬山顶", "englishName": "Yingshan / Flush gable roof", "definition": "山墙与屋面齐平或略高，不挑出。", "culturalNote": "明代以后广泛使用，利于防火（封火墙），常见于北方民居。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu4.png"  },
+            { "id": 80, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "攒尖顶", "englishName": "Zanjian / Pyramidal roof", "definition": "各屋面交汇于顶部一点，安放宝顶。分三角、四角、八角、圆形等。", "culturalNote": "多见于园林建筑（亭、阁）和礼制建筑（天坛祈年殿）。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu5.png"  },
+            { "id": 81, "primaryCategory": "屋顶类", "category": "屋顶样式", "name": "卷棚顶", "englishName": "Juanpeng / Roof with curved ridge", "definition": "无正脊，屋顶过陇处呈弧形曲面。", "culturalNote": "常用于园林、游廊，给人柔和、轻巧之感，民间亦称“元宝脊”。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu6.png"  },
+            { "id": 82, "primaryCategory": "屋顶类", "category": "屋顶结构", "name": "举折", "englishName": "Ju Zhe / Roof curvature rule", "definition": "确定屋顶曲面曲度的制度：先定屋架高（举），再通过步架依次下折脊檩高度。", "culturalNote": "宋代术语，使得屋顶呈现柔和凹曲线，兼具排水与采光之美。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu7.png"  },
+            { "id": 83, "primaryCategory": "屋顶类", "category": "屋顶结构", "name": "推山", "englishName": "Tuishan / Hip-ridge pushing", "definition": "为处理庑殿顶正脊过短的问题，将正脊向两端推出的做法。", "culturalNote": "使垂脊形成柔和的曲线，是宋代《营造法式》中重要的美学设计。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu8.png"  },
+            { "id": 84, "primaryCategory": "屋架类", "category": "屋架", "name": "抬梁式", "englishName": "Tailiang / Post-and-lintel", "definition": "柱上搁梁，梁上立童柱（蜀柱）再搁短梁，层层叠落以支撑檩条。", "culturalNote": "中国古代殿堂建筑最主要的木构架形式，室内空间开阔。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu9.png"  },
+            { "id": 85, "primaryCategory": "屋架类", "category": "屋架", "name": "穿斗式", "englishName": "Chuandou / Column-and-tie", "definition": "用穿枋将柱子串联，柱上直接承檩，柱间距小。", "culturalNote": "南方民居常用，抗风性能好，但室内柱密，空间局促。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu10.png"  },
+            { "id": 86, "primaryCategory": "屋架类", "category": "屋架", "name": "平梁", "englishName": "Pingliang / Level cross beam", "definition": "位于梁架最上一层、长度为两椽（两步架）的梁，承托脊槫。", "culturalNote": "宋代术语。清代对应为“三架梁”，其上立蜀柱或叉手。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu11.png"  },
+            { "id": 87, "primaryCategory": "屋架类", "category": "屋架", "name": "四椽栿", "englishName": "Sichuanfu / Four-rafter beam", "definition": "长度跨四椽（四步架）的大梁，是殿堂中主要的承重构件。", "culturalNote": "宋代术语。根据跨度不同，还有“六椽栿”、“八椽栿”等。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu12.png"  },
+            { "id": 88, "primaryCategory": "屋架类", "category": "屋架", "name": "乳栿", "englishName": "Rufu / Two-rafter beam", "definition": "长度仅跨两椽（两步架）的短梁，通常用于外檐或丁栿位置。", "culturalNote": "宋代术语。相对于平梁和四椽栿，它属于次要承重梁架。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu13.png"  },
+            { "id": 89, "primaryCategory": "屋架类", "category": "屋架", "name": "月梁", "englishName": "Yueliang / Crescent beam", "definition": "经过艺术加工的梁，断面呈弧形，似新月，两端削成卷杀弧度。", "culturalNote": "多用于高级殿宇，形态优美，是技术与艺术的完美结合。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu14.png"  },
+            { "id": 90, "primaryCategory": "屋架类", "category": "屋架", "name": "叉手", "englishName": "Chashou / Scissors strut", "definition": "脊槫两侧斜向支撑的构件，底部立于平梁之上，呈人字形。", "culturalNote": "汉代即有，宋代以前常见，明清则多用蜀柱而少用叉手。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu15.png"  },
+            { "id": 91, "primaryCategory": "屋架类", "category": "屋架", "name": "托脚", "englishName": "Tuojiao / Inclined strut", "definition": "用于支撑平槫的斜向构件，下端置于梁侧，上端托住槫。", "culturalNote": "主要起稳定梁架、传递荷载的作用，防止平槫侧向位移。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/wu/wu16.png"  },
+            { "id": 92, "primaryCategory": "屋架类", "category": "屋架", "name": "蜀柱", "englishName": "Shuzhu / Short post", "definition": "立于梁上用以承托上层梁或檩条的短柱。", "culturalNote": "即“童柱”，因高度矮小似蜀地（古代少数民族）身材而得名。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu17.png"  },
+            { "id": 93, "primaryCategory": "屋架类", "category": "屋架", "name": "瓜柱", "englishName": "Guazhu / Melon-shaped post", "definition": "蜀柱的一种，因断面多为瓜形（圆形）或高度较矮而得名。", "culturalNote": "多见于清式建筑，分“金瓜柱”、“脊瓜柱”等。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu18.png"  },
+            { "id": 94, "primaryCategory": "屋顶类", "category": "屋顶构件", "name": "檩（桁）", "englishName": "Lin / Purlin", "definition": "与屋脊平行，直接承受椽子荷载的横向水平构件。", "culturalNote": "处于屋顶最高处的檩称为“脊檩”，即成语“栋梁之材”中的“栋”。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu19.png"  },
+            { "id": 95, "primaryCategory": "屋顶类", "category": "屋顶构件", "name": "椽", "englishName": "Chuan / Rafter", "definition": "垂直于屋脊，直接承受望板（屋面板）及瓦件荷载的木条。", "culturalNote": "位于屋檐口的叫“飞椽”，用于加大出檐深度以保护柱础。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu20.png"  },
+            { "id": 96, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "瓦", "englishName": "Wa / Tile", "definition": "覆盖屋顶的片状建筑材料，主要分“板瓦”（凹形）和“筒瓦”（半圆形）。", "culturalNote": "汉代出现“瓦当”（封堵瓦头的圆形或半圆形装饰）。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu21.png"  },
+            { "id": 97, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "琉璃瓦", "englishName": "Liuli / Glazed tile", "definition": "表面施釉烧制的瓦，颜色有黄、绿、蓝、黑等。", "culturalNote": "黄色属皇家专用（如故宫），绿色用于王府或寺庙，蓝色用于天坛。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu22.png"  },
+            { "id": 98, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "正脊", "englishName": "Zhengji / Main ridge", "definition": "屋顶前后两坡相交处的最高屋脊。", "culturalNote": "两端通常安装“正吻”（鸱吻），有避火驱邪的寓意。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu23.png"  },
+            { "id": 99, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "垂脊", "englishName": "Chuiji / Vertical ridge", "definition": "歇山、悬山、硬山顶中，与正脊垂直或相交的屋脊。", "culturalNote": "庑殿顶称为“垂脊”，歇山顶下部与山墙平行的垂脊称为“山花”。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu24.png"  },
+            { "id": 100, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "戗脊", "englishName": "Qiangji / Diagonal ridge", "definition": "歇山顶中，由歇山垂脊下端至屋檐转角处的屋脊。", "culturalNote": "戗脊上常布置仙人走兽（脊兽），数量多少代表建筑等级高低。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu25.png"  },
+            { "id": 101, "primaryCategory": "屋顶类", "category": "屋顶瓦作", "name": "鸱吻", "englishName": "Chiwen / Roof finial", "definition": "位于正脊两端的装饰构件，张口吞脊，后插背兽。", "culturalNote": "龙生九子之一，喜水，置于屋顶寓意镇火。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu26.png"  },
+            { "id": 102, "primaryCategory": "屋顶类", "category": "屋顶装修", "name": "藻井", "englishName": "Zaojing / Caisson ceiling", "definition": "宫殿、坛庙明间正中，向上凸起的穹窿状装饰。", "culturalNote": "象征天宇，多为木构，雕刻彩绘极其华丽，如故宫太和殿藻井。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu27.png"  },
+            { "id": 103, "primaryCategory": "屋顶类", "category": "屋顶装修", "name": "天花", "englishName": "Tianhua / Ceiling", "definition": "遮蔽梁架以上屋顶构件的木格板，起保温和装饰作用。", "culturalNote": "露明（彻上明造）则是不设天花，直接暴露梁架，显示结构美。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu28.png"  },
+            { "id": 104, "primaryCategory": "屋顶类", "category": "草架", "name": "草架", "englishName": "Caojia / Roof draft frame", "definition": "天花（顶棚）之上，不可见的、未经精细加工的结构层。", "culturalNote": "宋代术语。明清江南建筑中，在草架之下再做一个卷棚轩，增加层次。", "reference": "《园冶》", "status": "已完成","image": "./images/wu/wu29.png"  },
+            { "id": 105, "primaryCategory": "屋架类", "category": "特殊构件", "name": "大额", "englishName": "Da'e / Giant tie beam", "definition": "元代建筑中常见的大型横向联系构件，位于柱头之上，跨度极大。", "culturalNote": "山西、陕西元代建筑特征，是“大额式”建筑的代表构件。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/wu/wu30.png"  },
+            { "id": 106, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "鸱吻", "englishName": "Chiwen / Roof-dragon ornament", "definition": "安装于屋顶正脊两端的龙形装饰构件，龙口大张咬住正脊。", "culturalNote": "象征防火辟邪，源于汉代，明清时造型更繁复，等级越高的建筑鸱吻越精美。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian1.png"  },
+            { "id": 107, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "藻井", "englishName": "Caisson / Ceiling well", "definition": "宫殿、庙宇等重要建筑室内顶棚的豪华装饰，呈井字形向上隆起。", "culturalNote": "多用于宝座、神龛上方，象征\"天圆地方\"，等级最高的为八角形藻井（如故宫太和殿）。", "reference": "《中国古代建筑史》", "status": "已完成","image": "./images/jian/jian2.png"  },
+            { "id": 108, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "天花", "englishName": "Tianhua / Decorative ceiling", "definition": "建筑室内顶棚的总称，分井口天花、海墁天花等，有彩绘或雕刻装饰。", "culturalNote": "起到遮蔽梁架、美化空间的作用，普通民居多用简单的木板天花，皇家建筑则施金龙和玺彩画。", "reference": "《营造法式解读》", "status": "已完成","image": "./images/jian/jian3.png"  },
+            { "id": 109, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "斗拱彩绘", "englishName": "Dougong painting", "definition": "在斗拱构件表面绘制的彩画，常用和玺彩画、旋子彩画、苏式彩画。", "culturalNote": "彩画内容与建筑等级相关：和玺彩画用于皇宫，旋子彩画用于官署，苏式彩画用于园林。", "reference": "《中国建筑彩画》", "status": "已完成","image": "./images/jian/jian4.png"  },
+            { "id": 110, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "雀替", "englishName": "Queti / Bracket arm ornament", "definition": "安装于梁枋与立柱交接处的装饰构件，呈三角形或梯形，有雕刻纹样。", "culturalNote": "兼具结构与装饰功能，明清时雕刻内容丰富，有龙纹、凤纹、花鸟纹等，象征吉祥。", "reference": "《中国建筑构件图解》", "status": "已完成","image": "./images/jian/jian5.png"  },
+            { "id": 111, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "挂落", "englishName": "Gualuo / Hanging ornament", "definition": "安装于廊柱之间的装饰性木构架，由枋木和花格组成，可透光通风。", "culturalNote": "常见于园林建筑，花格纹样多样（如冰裂纹、回纹），增加建筑的通透感和美感。", "reference": "《江南园林建筑》", "status": "已完成","image": "./images/jian/jian6.png"  },
+            { "id": 112, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "影壁", "englishName": "Yingbi / Screen wall", "definition": "位于大门内侧或外侧的墙壁，用于遮挡视线、装饰空间，有独立式和附属式。", "culturalNote": "又称\"照壁\"，表面常绘有壁画或雕刻（如\"福\"字、松鹤图），是中国传统建筑的标志性装饰。", "reference": "《中国民居建筑》", "status": "已完成","image": "./images/jian/jian7.png"  },
+            { "id": 113, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "瓦当", "englishName": "Wadang / Eaves tile end", "definition": "覆盖在屋顶檐头瓦件的端头，有圆形和半圆形，表面有文字或图案。", "culturalNote": "常见纹样有云纹、龙纹、饕餮纹，文字多为吉祥语（如\"长乐未央\"），兼具防水和装饰功能。", "reference": "《中国古代瓦当》", "status": "已完成","image": "./images/jian/jian8.png"  },
+            { "id": 114, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "彩画", "englishName": "Caihua / Architectural painting", "definition": "木构件表面绘制的装饰图案，分和玺、旋子、苏式三大类。", "culturalNote": "等级最高为和玺（皇家），旋子为官式，苏式用于园林。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian9.png"  },
+            { "id": 115, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "匾额", "englishName": "Bian’e / Plaque", "definition": "悬挂于门楣、厅堂的题字木牌，标明建筑名称。", "culturalNote": "体现建筑身份与文化内涵，皇家多用金字、龙边。", "reference": "《中国古建筑装饰》", "status": "已完成","image": "./images/jian/jian10.png"  },
+            { "id": 116, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "楹联", "englishName": "Yinglian / Couplet", "definition": "悬挂于柱上的对仗对联，多为木质、雕刻描金。", "culturalNote": "与匾额配套，强化意境与教化，园林建筑最常见。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian11.png"  },
+            { "id": 117, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "雕花窗", "englishName": "Diaohua Chuang / Carved window", "definition": "窗棂雕刻花鸟、瑞兽、几何纹样的装饰窗。", "culturalNote": "寓意吉祥，兼具通风采光与隐私遮挡。", "reference": "《中国民居建筑》", "status": "已完成","image": "./images/jian/jian12.png"  },
+            { "id": 118, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "博风板", "englishName": "Bofeng Ban / Bargeboard", "definition": "悬山、歇山山墙顶端封边木板，常饰花纹。", "culturalNote": "保护木构件，防风防雨，山墙立面更完整美观。", "reference": "《营造法式》解读", "status": "已完成","image": "./images/jian/jian13.png"  },
+            { "id": 119, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "悬鱼", "englishName": "Xuanyu / Hanging fish ornament", "definition": "博风板正中下垂的鱼形木雕装饰。", "culturalNote": "寓意 “年年有余”，防火避灾，多见于民居。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian14.png"  },
+            { "id": 120, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "惹草", "englishName": "Recao / Leaf ornament", "definition": "悬鱼两侧的云叶状装饰，与悬鱼配套。", "culturalNote": "与悬鱼共同构成山墙经典装饰组合。", "reference": "《营造法式》", "status": "已完成","image": "./images/jian/jian15.png"  },
+            { "id": 121, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "门环", "englishName": "Menhuan / Door knocker", "definition": "大门上的金属拉手，底座称 “铺首”。", "culturalNote": "铺首多为兽面，镇宅辟邪，等级越高越华丽。", "reference": "《中国古建筑装饰》", "status": "已完成","image": "./images/jian/jian16.png"  },
+            { "id": 122, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "铺首", "englishName": "Pushou / Door base ornament", "definition": "门环底座，多为龟、蛇、狮、兽面造型。", "culturalNote": "象征守护门户、驱邪避凶。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/jian/jian17.png"  },
+            { "id": 123, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "角神", "englishName": "Jiao Shen / Corner deity", "definition": "斗拱转角处的小神像或力士装饰。", "culturalNote": "起支撑与装饰作用，多见于宋辽金建筑。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/jian/jian18.png"  },
+            { "id": 124, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "垂花", "englishName": "Chuihua / Hanging flower", "definition": "垂花门下垂的短柱，端头雕成花瓣状。", "culturalNote": "为园林宅门标志性装饰，极富美感。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian19.png"  },
+            { "id": 125, "primaryCategory": "装饰类", "category": "墙体类", "name": "山墙", "englishName": "Shanqiang / Gable wall", "definition": "建筑两端的墙体，因呈三角形如山状而得名，有硬山、悬山等形式。", "culturalNote": "主要起承重和防火作用，南方民居的山墙常做成阶梯形（封火山墙），造型独特。", "reference": "《中国建筑墙体》", "status": "已完成","image": "./images/jian/jian20.png"  },
+            { "id": 126, "primaryCategory": "装饰类", "category": "墙体类", "name": "女儿墙", "englishName": "Nverqiang / Parapet wall", "definition": "屋顶边缘的矮墙，高度一般在1-1.5米，用于保护人员安全。", "culturalNote": "名称源于\"防止女儿坠落\"的传说，皇家建筑的女儿墙常有雕刻装饰，普通建筑则较简单。", "reference": "《营造法式注》", "status": "已完成","image": "./images/jian/jian21.png"  },
+            { "id": 127, "primaryCategory": "装饰类", "category": "墙体类", "name": "槛墙", "englishName": "Jian Qiang / Sill wall", "definition": "窗下、门下段的矮墙，起围护作用。", "culturalNote": "多为砖砌，可抹灰、彩绘。", "reference": "《中国民居建筑》", "status": "已完成","image": "./images/jian/jian22.png"  },
+            { "id": 128, "primaryCategory": "装饰类", "category": "墙体类", "name": "廊墙", "englishName": "Lang Qiang / Corridor wall", "definition": "廊子一侧或两侧的隔断墙，可开窗。", "culturalNote": "分隔空间，增加层次与私密性。", "reference": "《江南园林志》", "status": "已完成","image": "./images/jian/jian23.png"  },
+            { "id": 129, "primaryCategory": "装饰类", "category": "墙体类", "name": "八字墙", "englishName": "Bazi Qiang / Eight-shaped wall", "definition": "大门两侧呈八字外撇的墙壁。", "culturalNote": "扩大入口气势，官式、寺庙常用。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian24.png"  },
+            { "id": 130, "primaryCategory": "装饰类", "category": "楼梯类", "name": "楼梯", "englishName": "Louti / Staircase", "definition": "连接不同楼层的交通设施，由踏步、栏杆、扶手组成，有直梯、转角梯等形式。", "culturalNote": "中国传统建筑的楼梯多为木质，栏杆常雕刻花纹，重要建筑的楼梯踏步可镶嵌大理石。", "reference": "《中国建筑交通设施》", "status": "已完成","image": "./images/jian/jian25.png"  },
+            { "id": 131, "primaryCategory": "装饰类", "category": "排水类", "name": "排水兽", "englishName": "Paishuishou / Drainage beast", "definition": "安装于屋顶檐角的排水构件，造型为兽形，兽口朝下用于排水。", "culturalNote": "又称\"垂兽\"，兼具排水和装饰功能，常见造型有狮子、海马等，象征辟邪防灾。", "reference": "《中国古建筑排水》", "status": "已完成","image": "./images/jian/jian26.png"  },
+            { "id": 132, "primaryCategory": "台基与柱类", "category": "台基", "name": "御道", "englishName": "Yudao / Imperial path", "definition": "宫殿踏道中间雕龙的斜坡道，仅供皇帝通行。", "culturalNote": "象征皇权至高无上，多为汉白玉雕龙。", "reference": "《紫禁城建筑》", "status": "已完成","image": "./images/jian/jian27.png"  },
+            { "id": 133, "primaryCategory": "台基与柱类", "category": "台基", "name": "栏板", "englishName": "Lanban / Railing slab", "definition": "月台、台阶两侧石质护栏板，常雕纹样。", "culturalNote": "皇家多用龙凤，园林多用花鸟、山水。", "reference": "《中国建筑石作》", "status": "已完成","image": "./images/jian/jian28.png"  },
+            { "id": 134, "primaryCategory": "台基与柱类", "category": "台基", "name": "望柱", "englishName": "Wangzhu / Railing pillar", "definition": "栏板之间的立柱，顶部雕莲瓣、狮子、云龙。", "culturalNote": "柱头样式代表建筑等级。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian29.png"  },
+            { "id": 135, "primaryCategory": "台基与柱类", "category": "台基", "name": "散水", "englishName": "Sanshui / Apron", "definition": "台基四周铺砌的倾斜地面，用于排水。", "culturalNote": "保护台基与墙基，防止雨水冲刷。", "reference": "《营造法原》", "status": "已完成","image": "./images/jian/jian30.png"  },
+            { "id": 136, "primaryCategory": "台基与柱类", "category": "台基", "name": "陡板石", "englishName": "Douban Shi / Risers", "definition": "台基侧面的护面石，构成台基立面。", "culturalNote": "多为青白石，平整光洁，增强稳固感。", "reference": "《中国古建筑构造》", "status": "已完成","image": "./images/jian/jian31.png"  },
+            { "id": 137, "primaryCategory": "台基与柱类", "category": "柱类", "name": "角柱", "englishName": "Jiaozhu / Corner column", "definition": "建筑转角处的立柱，受力大于普通柱。", "culturalNote": "转角关键构件，常加粗加固。", "reference": "《营造法式》", "status": "已完成","image": "./images/jian/jian32.png"  },
+            { "id": 138, "primaryCategory": "台基与柱类", "category": "柱类", "name": "瓜楞柱", "englishName": "Gualeng Zhu / Melon edge column", "definition": "柱身做成多瓣瓜棱形，外观圆润优美。", "culturalNote": "多用于园林、厅堂，显精致典雅。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian33.png"  },
+            { "id": 139, "primaryCategory": "台基与柱类", "category": "柱类", "name": "梭柱", "englishName": "Suozhu / Shuttle column", "definition": "柱身两端收小、中间粗，形似梭子。", "culturalNote": "宋代典型柱式，柔和优美，受力合理。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/jian/jian34.png"  },
+            { "id": 140, "primaryCategory": "台基与柱类", "category": "柱类", "name": "楹柱", "englishName": "Yingzhu / Main column", "definition": "厅堂主要承重立柱，常悬挂楹联。", "culturalNote": "为建筑主体立柱，地位重要。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/jian/jian35.png"  },
+            { "id": 141, "primaryCategory": "台基与柱类", "category": "柱类", "name": "雷公柱", "englishName": "Leigong Zhu / Thunder pillar", "definition": "攒尖顶正中垂悬的短柱，支撑宝顶。", "culturalNote": "仅起装饰与稳定作用，不落地。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian35(2).png"  },
+            { "id": 142, "primaryCategory": "屋架类", "category": "梁枋构件", "name": "额枋", "englishName": "E Fang / Lintel", "definition": "柱顶连接立柱的横向构件。", "culturalNote": "承托斗拱与屋顶，是柱网关键联系件。", "reference": "《营造法式》", "status": "已完成","image": "./images/wu/wu31.png"  },
+            { "id": 143, "primaryCategory": "屋架类", "category": "梁枋构件", "name": "平板枋", "englishName": "Pingban Fang / Flat plate lintel", "definition": "额枋之上、斗拱之下的水平枋木。", "culturalNote": "承托斗拱，使荷载均匀传递。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu32.png"  },
+            { "id": 144, "primaryCategory": "屋架类", "category": "梁枋构件", "name": "随梁枋", "englishName": "Suiliang Fang / Tie beam", "definition": "紧贴大梁下方的辅助枋木。", "culturalNote": "增强梁架刚度，防止变形。", "reference": "《中国古建筑构造》", "status": "已完成","image": "./images/wu/wu33.png"  },
+            { "id": 145, "primaryCategory": "装饰类", "category": "门窗", "name": "棂格", "englishName": "Lingge / Lattice", "definition": "窗、隔扇内部的花纹骨架。", "culturalNote": "样式繁多：冰裂纹、步步锦、回纹等。", "reference": "《中国古建筑门窗》", "status": "已完成","image": "./images/jian/jian35(3).png"  },
+            { "id": 146, "primaryCategory": "装饰类", "category": "门窗", "name": "风门", "englishName": "Fengmen / Wind door", "definition": "大门外侧附加的小门，冬季挡风。", "culturalNote": "北方民居常用，保暖实用。", "reference": "《中国民居》", "status": "已完成","image": "./images/jian/jian35(4).png"  },
+            { "id": 147, "primaryCategory": "装饰类", "category": "构件", "name": "博古架", "englishName": "Bogu Jia / Curio shelf", "definition": "室内陈列古玩的多格木架。", "culturalNote": "文人建筑标配，显清雅格调。", "reference": "《中国室内装饰史》", "status": "已完成","image": "./images/jian/jian35(5).png"  },
+            { "id": 148, "primaryCategory": "装饰类", "category": "构件", "name": "落地罩", "englishName": "Luodi Zhao / Floor screen", "definition": "室内分隔用的落地花罩，不封闭。", "culturalNote": "划分空间又保持通透，园林厅堂常用。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian35(6).png"  },
+            { "id": 149, "primaryCategory": "装饰类", "category": "构件", "name": "仙楼", "englishName": "Xianlou / Mezzanine", "definition": "室内上层小木作阁楼。", "culturalNote": "用于藏经、供佛、储物，多见于寺观。", "reference": "《中国古建筑小木作》", "status": "已完成","image": "./images/jian/jian35(7).png"  },
+            { "id": 150, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "管脚榫", "englishName": "Foot Tenon", "definition": "木柱下端伸出的短榫，插入柱础石的卯眼内。", "culturalNote": "固定木柱，防止木柱滑移倾覆，是柱与柱础之间关键连接榫卯，宋式殿堂普遍使用。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun41.png"  },
+            { "id": 151, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "箍头榫", "englishName": "Hoop-head Tenon", "definition": "阑额两端做出榫头，箍住柱头，枋与柱十字相交。", "culturalNote": "约束柱头向外撑开，增强柱头稳定性，多用于宋式建筑阑额与立柱交接。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun42.png"  },
+            { "id": 152, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "栽销", "englishName": "Dowel Pin", "definition": "单独预制的小木销，嵌入构件预留孔中，连接叠合木料。", "culturalNote": "辅助加固构件，多用于斗栱、木板拼合，属于辅助加固榫件，不承担主要受力。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun43.png"  },
+            { "id": 153, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "搭掌榫", "englishName": "Lapped-shoulder Tenon", "definition": "两个相交构件各削去一半厚度，互相搭接咬合的斜交榫卯。", "culturalNote": "多用于斜向支撑构件，让斜撑和主体木构件紧密贴合咬合。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun44.png"  },
+            { "id": 154, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "刻半榫", "englishName": "Half-lap Joint", "definition": "十字相交构件各自刻去一半木料厚度，互相叠压搭接。", "culturalNote": "加工简便，用于次要水平枋件十字相交，适合荷载较小的辅助构件。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun45.png"  },
+            { "id": 155, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "套顶榫", "englishName": "Socketed Top Tenon", "definition": "柱子榫头向上贯穿梁枋，榫头伸出梁上，用于楼阁通柱。", "culturalNote": "通柱贯穿多层梁架，强化楼阁上下层木构整体性，多层楼阁专用。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun46.png"  },
+            { "id": 156, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "下榫", "englishName": "Lower Tenon", "definition": "构件下端向下凸出的榫头，用于对接下方构件。", "culturalNote": "梁、栱下端伸出，用来承接下部斗件，传递竖向荷载，属于大木作上下对接榫。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun47.png"  },
+            { "id": 157, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "勾榫", "englishName": "Hook Tenon", "definition": "带弯钩形态的榫头，勾锁住卯口，防止构件脱开。", "culturalNote": "用于歇山节点、斗栱组合，地震震动下可以防止构件拔榫散架。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun48.png"  },
+            { "id": 158, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "穿销榫", "englishName": "Through Dowel", "definition": "木销横向贯穿两个咬合构件，锁死榫卯节点。", "culturalNote": "用来锁住透榫，防止拔榫滑脱，宋式官式木构大量使用木销加固节点。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun49.png"  },
+            { "id": 159, "primaryCategory": "榫卯类", "category": "榫卯类", "name": "楔榫", "englishName": "Tapered Wedge Tenon", "definition": "楔形木楔打入榫缝，挤压使榫卯越打越紧。", "culturalNote": "利用楔块的挤压力消除缝隙，加固松动的榫卯节点，古代木构维修常用。", "reference": "宋·李诫《营造法式》", "status": "已完成","image": "./images/sun/sun50.png"  },
+            { "id": 160, "primaryCategory": "屋架类", "category": "屋架", "name": "草栿", "englishName": "Caofu / Rough beam", "definition": "天花（顶棚）之上不可见的梁，加工粗糙，仅作承重，不露明。", "culturalNote": "宋代术语。与“明栿”相对，常见于彻上明造或设有天花的大殿。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu36.png"  },
+            { "id": 161, "primaryCategory": "屋架类", "category": "屋架", "name": "明栿", "englishName": "Mingfu / Finished beam", "definition": "天花以下可见的梁，经过精细加工，常制成月梁形，兼具承重与装饰。", "culturalNote": "宋代术语。露明造建筑中，明栿是主要观赏构件，体现结构美。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu37.png"  },
+            { "id": 162, "primaryCategory": "屋架类", "category": "屋架", "name": "劄牵", "englishName": "Zhaqian / One-rafter beam", "definition": "长度仅跨一椽的短梁，位于梁架上层，用于调整梁架结构。", "culturalNote": "宋代术语。常与乳栿配合使用，是殿堂复杂梁架中的辅助构件。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/wu/wu38.png"  },
+            { "id": 163, "primaryCategory": "屋架类", "category": "屋架", "name": "双步梁", "englishName": "Shuangbu liang / Two-step beam", "definition": "清式建筑中，长度跨两步架（两椽）的梁，一端架在柱头，另一端插入柱身。", "culturalNote": "对应宋式“乳栿”，多用于小式建筑或廊庑。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu39.png"  },
+            { "id": 164, "primaryCategory": "屋架类", "category": "屋架", "name": "单步梁", "englishName": "Danbu liang / One-step beam", "definition": "清式建筑中，长度仅跨一步架（一椽）的短梁，常与双步梁配合。", "culturalNote": "对应宋式“劄牵”，用于檐廊或廊庑的梁架节点。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu40.png"  },
+            { "id": 165, "primaryCategory": "屋架类", "category": "屋架构件", "name": "阑额", "englishName": "Lan'e / Architrave", "definition": "连接檐柱柱头的横向联系构件，上皮与柱头齐平。", "culturalNote": "宋式称“阑额”，清式称“额枋”，是柱头间最重要的拉结构件。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu41.png"  },
+            { "id": 166, "primaryCategory": "屋架类", "category": "屋架构件", "name": "普拍方", "englishName": "Pupai fang / Flat bearing plate", "definition": "置于阑额之上、栌斗之下的横木，断面呈“T”形，扩大斗栱承托面。", "culturalNote": "宋式术语。唐代罕见，宋辽金大量使用，是判断建筑年代的重要特征。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/wu/wu42.png"  },
+            { "id": 167, "primaryCategory": "屋架类", "category": "屋架构件", "name": "驼峰", "englishName": "Tuofeng / Camel-hump block", "definition": "置于梁架节点处，联系上下梁的垫托构件，形似骆驼峰背。", "culturalNote": "使单梁变为复合梁，增加抗弯刚度，常雕刻云纹、卷草等。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu43.png"  },
+            { "id": 168, "primaryCategory": "屋架类", "category": "屋架构件", "name": "角背", "englishName": "Jiaobei / Corner brace", "definition": "位于瓜柱两侧的三角形腋角木，用于稳定瓜柱、增强节点刚度。", "culturalNote": "清式常见，与驼峰功能相似，但更强调对瓜柱的扶持。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu44.png"  },
+            { "id": 169, "primaryCategory": "屋架类", "category": "屋架构件", "name": "生头木", "englishName": "Shengtou mu / Corner-raising block", "definition": "屋角处正侧两面檩上垫的三角形木条，使翼角逐渐翘起。", "culturalNote": "宋代称“生头木”，是形成“翼角起翘”优美曲线的关键构件。", "reference": "《<营造法式>解读》", "status": "已完成","image": "./images/wu/wu45.png"  },
+            { "id": 170, "primaryCategory": "屋架类", "category": "屋架构件", "name": "扶脊木", "englishName": "Fuji mu / Ridge-supporting log", "definition": "清式建筑脊桁之上并与之平行的六角形木，承托脑椽上端。", "culturalNote": "用于稳固脊部结构，使脊部椽、瓦排列更整齐。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu46.png"  },
+            { "id": 171, "primaryCategory": "屋架类", "category": "屋架", "name": "抱头梁", "englishName": "Baotou liang / Short beam", "definition": "小式大木作中，连接檐柱与金柱的短梁，梁头无复杂雕饰。", "culturalNote": "清式术语。因梁头常做成挑尖状，又称“挑尖梁”。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu47.png"  },
+            { "id": 172, "primaryCategory": "屋架类", "category": "屋架", "name": "桃尖梁", "englishName": "Taojian liang / Peach-tip beam", "definition": "大式带斗栱建筑中，连接金柱与檐柱的短梁，梁头侧面呈桃形。", "culturalNote": "清式术语。主要起连接作用，梁头常雕刻为桃形或蚂蚱头形。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu48.png"  },
+            { "id": 173, "primaryCategory": "屋架类", "category": "屋架", "name": "太平梁", "englishName": "Taiping liang / Safety beam", "definition": "庑殿顶推山做法中，承托悬空脊檩的承重梁，保证结构安全。", "culturalNote": "清式术语。因推山后脊檩悬空，需太平梁与雷公柱共同承托。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu49.png"  },
+            { "id": 174, "primaryCategory": "屋架类", "category": "屋架", "name": "顺梁", "englishName": "Shunliang / Longitudinal beam", "definition": "清式建筑中，与房屋面阔方向平行的梁，用于承托山面梁架。", "culturalNote": "常见于庑殿、歇山建筑的山面，与趴梁配合使用。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/wu/wu50.png"  },
+            { "id": 175, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "垂兽", "englishName": "Chui Shou / Ridge beast ornament", "definition": "安装于屋顶垂脊上的瑞兽装饰构件，位于垂脊下端，依次排列。", "culturalNote": "等级越高的建筑垂兽数量越多，故宫太和殿垂兽有10个，是最高等级，象征守护建筑、驱邪避凶。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian36.png"  },
+            { "id": 176, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "戗兽", "englishName": "Qiang Shou / Hip ridge beast ornament", "definition": "安装于屋顶戗脊上的瑞兽装饰构件，位于歇山顶戗脊的下端。", "culturalNote": "与垂兽配套，数量随建筑等级变化，象征镇压屋脊、守护建筑，多见于官式建筑。", "reference": "《中国古代建筑史》", "status": "已完成","image": "./images/jian/jian37.png"  },
+            { "id": 177, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "套兽", "englishName": "Tao Shou / Sleeve beast ornament", "definition": "安装于屋顶翼角端部的兽形装饰构件，套在仔角梁的端头。", "culturalNote": "又称\"角兽\"，造型为龙头，象征吞住翼角，防止木构件受潮腐朽，同时增强建筑的飞动感。", "reference": "《营造法式解读》", "status": "已完成","image": "./images/jian/jian38.png"  },
+            { "id": 178, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "仙人走兽", "englishName": "Immortals and beasts / Roof ridge figures", "definition": "安装于屋顶垂脊、戗脊端部的仙人与瑞兽系列装饰构件。", "culturalNote": "最前端为骑凤仙人，后依次为龙、凤、狮子、天马、海马等瑞兽，数量与建筑等级严格对应，是古建筑等级的标志性装饰。", "reference": "《中国建筑装饰》", "status": "已完成","image": "./images/jian/jian39.png"  },
+            { "id": 179, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "花牙子", "englishName": "Hua Yazi / Carved lattice ornament", "definition": "安装于梁枋下、雀替下方的镂空雕花装饰构件，呈竖向长条状。", "culturalNote": "与雀替配套使用，雕刻纹样多为花鸟、卷草纹，增加建筑的精致感与层次感，多见于园林建筑。", "reference": "《江南园林建筑》", "status": "已完成","image": "./images/jian/jian40.png"  },
+            { "id": 180, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "楣子", "englishName": "Meizi / Lintel lattice ornament", "definition": "安装于廊柱间、门窗上方的横向花格装饰构件，由棂条组成几何纹样。", "culturalNote": "又称\"挂落\"的横向版本，常见于亭、廊、轩榭，既能分隔空间，又能保持通透感，纹样有冰裂纹、回纹、步步锦等。", "reference": "《中国民居建筑》", "status": "已完成","image": "./images/jian/jian41.png"  },
+            { "id": 181, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "瓦当滴水", "englishName": "Wadang Dishui / Eaves tile drip", "definition": "安装于屋顶檐头瓦件的下端，与瓦当配套的下垂形装饰构件。", "culturalNote": "表面多有吉祥纹样，如蝙蝠、寿字、莲花，既能引导雨水滴落，保护檐下木构件，又能增强檐部的装饰效果。", "reference": "《中国古代瓦当》", "status": "已完成","image": "./images/jian/jian42.png"  },
+            { "id": 182, "primaryCategory": "装饰类", "category": "建筑装饰", "name": "山墙影壁", "englishName": "Shanqiang Yingbi / Gable screen wall", "definition": "位于建筑山墙外侧的装饰性影壁，与山墙连为一体。", "culturalNote": "多见于民居与园林建筑，表面常绘有山水、花鸟壁画，或雕刻吉祥图案，既美化山墙，又能阻挡寒风。", "reference": "《中国古建筑装饰》", "status": "已完成","image": "./images/jian/jian43.png"  },
+            { "id": 183, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "柱础", "englishName": "Zhuchu / Column base", "definition": "承载立柱的石质基座，位于立柱与台基之间，有雕刻装饰。", "culturalNote": "又称\"柱墩\"，分为鼓镜、瓜楞、仰覆莲等造型，既能防潮、保护木柱根部，又能装饰建筑，是古建筑台基的重要组成部分。", "reference": "《中国建筑构件图解》", "status": "已完成","image": "./images/jian/jian44.png"  },
+            { "id": 184, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "台基", "englishName": "Taiji / Platform base", "definition": "建筑下部的石质基座，由台明、踏跺、栏杆等组成，承托整个建筑。", "culturalNote": "又称\"台榭\"，高度与层数代表建筑等级，皇家建筑台基多为须弥座造型，雕栏玉砌，是建筑等级的核心标志之一。", "reference": "《中国古代建筑史》", "status": "已完成","image": "./images/jian/jian45.png"  },
+            { "id": 185, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "须弥座", "englishName": "Xumizuo / Sumeru base", "definition": "高级建筑使用的台基造型，由多层砖石叠砌而成，有束腰、仰覆莲等雕刻。", "culturalNote": "源于佛教须弥山，象征宇宙中心，是古建筑最高等级的台基，多用于宫殿、庙宇的主体建筑，如故宫太和殿的三层须弥座台基。", "reference": "《营造法式解读》", "status": "已完成","image": "./images/jian/jian46.png"  },
+            { "id": 186, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "踏跺", "englishName": "Taduo / Stone steps", "definition": "台基与地面之间的石质台阶，分为御路踏跺、垂带踏跺等。", "culturalNote": "御路踏跺为皇家建筑专用，中间雕刻龙纹，两侧为台阶；垂带踏跺两侧有垂带石，是官式建筑的标准台阶样式。", "reference": "《中国建筑图解词典》", "status": "已完成","image": "./images/jian/jian47.png"  },
+            { "id": 187, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "栏杆", "englishName": "Langan / Balustrade", "definition": "安装于台基、踏跺、廊桥两侧的防护与装饰构件，由望柱、栏板、地袱组成。", "culturalNote": "又称\"勾栏\"，栏板多雕刻龙凤、花鸟、吉祥纹样，望柱有莲瓣、狮子等造型，既是安全防护，也是建筑装饰的重要部分。", "reference": "《中国古建筑装饰》", "status": "已完成","image": "./images/jian/jian48.png"  },
+            { "id": 188, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "望柱", "englishName": "Wangzhu / Baluster column", "definition": "栏杆中的竖向立柱，支撑栏板，顶部有雕刻装饰。", "culturalNote": "又称\"柱子\"，顶部造型有莲瓣、石榴、狮子等，等级越高的建筑望柱雕刻越精美，是栏杆的核心构件。", "reference": "《中国建筑构件图解》", "status": "已完成","image": "./images/jian/jian49.png"  },
+            { "id": 189, "primaryCategory": "台基与柱类", "category": "台基柱类", "name": "栏板", "englishName": "Lanban / Baluster panel", "definition": "栏杆中望柱之间的横向板件，表面有雕刻装饰。", "culturalNote": "又称\"华板\"，雕刻内容多为龙凤、花鸟、历史故事、吉祥纹样，是栏杆装饰的核心载体，皇家建筑多为石雕龙凤纹。", "reference": "《营造法式》", "status": "已完成","image": "./images/jian/jian50.png"  },
+            { "id": 190, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "角神", "englishName": "Jiaoshen (corner deity)", "definition": "位于转角斗栱之下或平座四角，以力士或瑞兽形象用肩背扛起建筑转角。", "culturalNote": "辽塔最具想象力的构件，肌肉紧绷、表情用力，工匠刻意保留“用力”瞬间，让石头有了生命张力。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou36.png"  },
+            { "id": 191, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "平座斗栱", "englishName": "Pingzuo Dougong (balcony-level bracket set)", "definition": "出现在平坐层下方或层间过渡带的小型斗栱组合，出挑仅为檐下斗栱的一半甚至三分之一。", "culturalNote": "尺度更小、密度更高、装饰性更强，栱臂常雕卷草纹或云纹，位于人平视高度，为“被看见”而设计。", "reference": "《〈营造法式〉解读》", "status": "已完成","image": "./images/dou/dou37.png"  },
+            { "id": 192, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "仿木斗拱", "englishName": "Imitation-wood Dougong", "definition": "砖石塔上用砖石雕刻模仿木构斗拱的做法，完整“翻译”木斗拱的形态与出跳。", "culturalNote": "辽代砖塔典型做法，燃灯塔密檐叠涩即模仿木构出挑，体现南北工匠合作。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/dou/dou38.png"  },
+            { "id": 193, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "柱头铺作", "englishName": "Zhutou Puzuo", "definition": "宋式斗拱，安装在柱头上的铺作，承重最大。", "culturalNote": "清称柱头科，宋式核心承重铺作，位于柱头之上。", "reference": "《〈营造法式〉解读》", "status": "已完成","image": "./images/dou/dou39.png"  },
+            { "id": 194, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "栌斗", "englishName": "Ludou", "definition": "宋式斗拱最下层的大斗，清称“坐斗”。", "culturalNote": "位于柱头或阑额之上，是全朵铺作的承重核心，开十字卯口承托翘、昂与栱。", "reference": "《〈营造法式〉解读》", "status": "已完成","image": "./images/dou/dou40.png"  },
+            { "id": 195, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "散斗", "englishName": "Sandou", "definition": "宋式横栱两端的斗，清称“三才升”。", "culturalNote": "承托上层栱或枋，仅开一字口，体量小于交互斗。", "reference": "《〈营造法式〉解读》", "status": "已完成","image": "./images/dou/dou41.png"  },
+            { "id": 196, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "万栱", "englishName": "Wangong", "definition": "清式斗拱中长度最长的横栱，宋称“慢栱”。", "culturalNote": "位于泥道栱或瓜栱之上，承托上层枋木，是斗拱中横向构件最长者。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou42.png"  },
+            { "id": 197, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "瓜栱", "englishName": "Guagong", "definition": "清式斗拱中长度最短的横栱，宋称“瓜子栱”。", "culturalNote": "跳头第一层横栱，形制短小，承托万栱。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou43.png"  },
+            { "id": 198, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "坐斗", "englishName": "Zuodou", "definition": "清式斗拱最下层的大斗，宋称“栌斗”。", "culturalNote": "一攒斗拱的承重基础，开十字卯口承托翘、昂与栱。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou44.png"  },
+            { "id": 199, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "麻叶头", "englishName": "Mayetou", "definition": "清式翘、昂后尾的雕饰构件。", "culturalNote": "“三弯九转”做法，线条圆润如云头，兼具装饰与结构功能。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou45.png"  },
+            { "id": 200, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "溜金斗拱", "englishName": "Liujin Dougong", "definition": "清式斗拱，后尾延伸至金檩之下。", "culturalNote": "外檐斗拱的特殊形式，后尾起杠杆作用挑托金檩。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou46.png"  },
+            { "id": 201, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "隔架科", "englishName": "Gejiake", "definition": "清式内檐斗拱，置于梁与随梁枋之间。", "culturalNote": "缩短梁的净跨，起承托与稳定作用。", "reference": "《中国古建筑术语辞典》", "status": "已完成","image": "./images/dou/dou47.png"  },
+            { "id": 202, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "品字科", "englishName": "Pinzike", "definition": "清式内檐斗拱，三攒一组呈品字形排列。", "culturalNote": "用于殿内金柱之间，承托天花或上层梁架。", "reference": "《清式营造则例》", "status": "已完成","image": "./images/dou/dou48.png"  },
+            { "id": 203, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "一斗三升", "englishName": "Yidou Sansheng", "definition": "最简单的斗拱组合，栌斗上承横栱，两端各置一升。", "culturalNote": "汉代已见雏形，是斗拱发展的早期形态。", "reference": "《中国建筑史》", "status": "已完成","image": "./images/dou/dou49.png"  },
+            { "id": 204, "primaryCategory": "斗拱类", "category": "斗拱类", "name": "重栱造", "englishName": "Chonggongzao", "definition": "宋式斗拱，跳头施两层横栱（瓜子栱+慢栱）。", "culturalNote": "与单栱造相对，结构更稳固，等级更高。", "reference": "《〈营造法式〉解读》", "status": "已完成","image": "./images/dou/dou50.png"  }
+        ];
+
+        // ============================================================
+        // 全局变量
+        // ============================================================
+        let filteredData = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        const keywordInput = document.getElementById('keyword');
+        const searchBtn = document.getElementById('search-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultInfo = document.querySelector('.result-info');
+        const totalCountSpan = document.getElementById('total-count');
+        const primarySelect = document.getElementById('primary-select');
+        const categorySelect = document.getElementById('category-select');
+        const pagination = document.getElementById('pagination');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const currentPageSpan = document.getElementById('current-page');
+        const totalPagesSpan = document.getElementById('total-pages');
+
+        // ============================================================
+        // 初始化一级分类下拉
+        // ============================================================
+        function initPrimaryFilter() {
+            const primaries = [...new Set(corpusData.map(item => item.primaryCategory))];
+            primaries.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;
+                primarySelect.appendChild(option);
+            });
+        }
+
+        // ============================================================
+        // 根据一级分类联动二级分类下拉
+        // ============================================================
+        function updateSecondaryOptions() {
+            const primary = primarySelect.value;
+            // 清空二级
+            categorySelect.innerHTML = '<option value="all">全部二级</option>';
+
+            if (primary === 'all') {
+                categorySelect.disabled = true;
+                return;
+            }
+            categorySelect.disabled = false;
+
+            // 从数据中提取该一级分类下实际存在的二级分类
+            const secondaries = [...new Set(
+                corpusData
+                    .filter(item => item.primaryCategory === primary)
+                    .map(item => item.category)
+            )];
+            secondaries.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s;
+                option.textContent = s;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        // ============================================================
+        // 搜索 + 筛选核心逻辑
+        // ============================================================
+        function searchCorpus() {
+            const keyword = keywordInput.value.trim().toLowerCase();
+            showLoading();
+
+            setTimeout(() => {
+                // 1. 关键词过滤
+                if (keyword) {
+                    filteredData = corpusData.filter(item =>
+                        item.name.toLowerCase().includes(keyword) ||
+                        item.englishName.toLowerCase().includes(keyword) ||
+                        item.definition.toLowerCase().includes(keyword) ||
+                        item.culturalNote.toLowerCase().includes(keyword) ||
+                        item.reference.toLowerCase().includes(keyword) ||
+                        item.category.toLowerCase().includes(keyword) ||
+                        item.primaryCategory.toLowerCase().includes(keyword) ||
+                        item.status.toLowerCase().includes(keyword)
+                    );
+                } else {
+                    filteredData = [...corpusData];
+                }
+
+                // 2. 一级分类过滤
+                const primary = primarySelect.value;
+                if (primary !== 'all') {
+                    filteredData = filteredData.filter(item => item.primaryCategory === primary);
+                }
+
+                // 3. 二级分类过滤
+                const secondary = categorySelect.value;
+                if (secondary !== 'all') {
+                    filteredData = filteredData.filter(item => item.category === secondary);
+                }
+
+                currentPage = 1;
+                renderResults();
+                updatePagination();
+                resultInfo.style.display = 'flex';
+            }, 300);
+        }
+
+        // ============================================================
+        // 渲染结果
+        // ============================================================
+        function renderResults() {
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const currentPageData = filteredData.slice(startIndex, endIndex);
+
+            if (filteredData.length === 0) {
+                showEmptyResult();
+                pagination.style.display = 'none';
+                return;
+            }
+
+            let resultHtml = '<div class="result-list">';
+            currentPageData.forEach(item => {
+                resultHtml += `
+                    <div class="result-item">
+                        <div class="item-header">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-english">${item.englishName}</div>
+                            <div class="item-tags">
+                                <span class="item-category primary">${item.primaryCategory}</span>
+                                <span class="item-category">${item.category}</span>
+                            </div>
+                        </div>
+                         ${item.image ? `
+                            <div class="item-image">
+                                <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.parentElement.style.display='none'">
+                            </div>` : ''}
+                        <div class="item-content">
+                            <div class="item-label">定义说明：</div>
+                            <div class="item-value">${item.definition}</div>
+                            <div class="item-label">文化注释：</div>
+                            <div class="item-value">${item.culturalNote}</div>
+                            <div class="item-label">参考文献：</div>
+                            <div class="item-value item-reference">${item.reference}</div>
+                            <div class="item-label">数据状态：</div>
+                            <div class="item-value">
+                                <span class="item-status status-completed">${item.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            resultHtml += '</div>';
+            resultContainer.innerHTML = resultHtml;
+            totalCountSpan.textContent = filteredData.length;
+            pagination.style.display = 'flex';
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+            currentPageSpan.textContent = currentPage;
+            totalPagesSpan.textContent = totalPages;
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || filteredData.length === 0;
+        }
+
+        function showLoading() {
+            resultContainer.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在检索语料，请稍候...</p>
+                </div>
+            `;
+            resultInfo.style.display = 'none';
+            pagination.style.display = 'none';
+        }
+
+        function showEmptyResult() {
+            resultContainer.innerHTML = `
+                <div class="empty-result">
+                    <div class="icon">🔍</div>
+                    <h3>未找到相关语料</h3>
+                    <p>请尝试调整关键词或分类筛选条件<br>建议使用更宽泛的关键词，或查看全部语料</p>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // 事件绑定
+        // ============================================================
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderResults();
+                updatePagination();
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderResults();
+                updatePagination();
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // 一级分类变化 → 联动二级 → 自动搜索
+        primarySelect.addEventListener('change', () => {
+            updateSecondaryOptions();
+            searchCorpus();
+        });
+
+        // 二级分类变化 → 自动搜索
+        categorySelect.addEventListener('change', searchCorpus);
+
+        searchBtn.addEventListener('click', searchCorpus);
+
+        keywordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') searchCorpus();
+        });
+
+        window.addEventListener('load', () => {
+            initPrimaryFilter();
+            updateSecondaryOptions();
+            keywordInput.focus();
+        });
+    </script>
+</body>
+
+</html>
